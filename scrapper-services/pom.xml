@@ -46,6 +46,12 @@
         </dependency>
 
         <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+            <version>2.68.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.kumuluz.ee.metrics</groupId>
             <artifactId>kumuluzee-metrics-core</artifactId>
         </dependency>

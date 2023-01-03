@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.io.IOException;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -25,48 +28,35 @@ public class ScrapperBean {
     public List<Float> getScrapperPrice(String artikelName) {
         ArrayList<Float> list = new ArrayList<Float>();
 
-//        float valueMercator = scrapeMercator(artikelName);
-        float valueMercator = 1;
-        float valueSpar = scrapeSpar(artikelName);
-//        float valueSpar = scrapeSpar();
-        if (valueMercator > 0) list.add(valueMercator);
-        if (valueSpar > 0) list.add(valueSpar);
-
+        float valueTus = scrapeTus(artikelName);
+        float valueJager = scrapeJager(artikelName);
+        if (valueTus > 0) list.add(valueTus); else list.add((float) 0);
+        if (valueJager > 0) list.add(valueJager); else list.add((float) 0);
         return list;
     }
 
-    public static float scrapeSpar(String artikelName){
+    public static float scrapeJager(String artikelName) {
         float price = 0;
         try {
+            WebClient webClient = new WebClient(BrowserVersion.CHROME);
+            webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
+            webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
+            webClient.waitForBackgroundJavaScript(5000); // important! wait until javascript finishes rendering
+            String url = "https://www.spletninakupi.si/iskanje?q="+artikelName+"&sort=name-asc&s=&cena-od=&cena-do=";
+            System.out.println(url);
+            HtmlPage page = webClient.getPage(url);
+
             /**
              * Here we create a document object,
              * Then we use JSoup to fetch the website.
              */
-            Document doc = Jsoup.connect("https://www.spar.si/online/search/?q=" + artikelName).get();
-//            System.out.println(doc.getAllElements().toString());
-            /**
-             * With the document fetched,
-             * we use JSoup???s title() method to fetch the title
-             */
-//            System.out.printf("\nWebsite Title: %s\n\n", doc.title());
+            Document doc = Jsoup.parse(page.asXml());
 
-            // Get the list of repositories
-            //*[@id="grid"]/div[1]/div[1]/div[4]/div[2]/strong
-            Elements repositories = doc.getElementsByClass("spar-productBox__price--priceInteger");
+            Elements repositories = doc.getElementsByClass("discounted-price");
             if (!repositories.isEmpty()) {
-                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                 Element repository = repositories.first();
-                System.out.println(repositories.toString());
-                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-                price = Float.parseFloat(repository.text().replace(',','.'));
-            }
-            repositories = doc.getElementsByClass("spar-productBox__price--priceDecimal");
-            if (!repositories.isEmpty()) {
-                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-                Element repository = repositories.first();
-                System.out.println(repositories.toString());
-                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-                price = price + Float.parseFloat(repository.text().replace(',','.')) / 100;
+                price = Float.parseFloat(repository.text().replace(',','.').replace('€',' '));
+                System.out.println(price);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -74,30 +64,21 @@ public class ScrapperBean {
         return price;
     }
 
-    public static float scrapeMercator(String artikelName){
+    public static float scrapeTus(String artikelName){
         float price = 0;
         try {
-            /**
-             * Here we create a document object,
-             * Then we use JSoup to fetch the website.
-             */
-            Document doc = Jsoup.connect("https://trgovina.mercator.si/market/brskaj#search=" + artikelName).get();
-//            System.out.println(doc.getAllElements().toString());
-            /**
-             * With the document fetched,
-             * we use JSoup???s title() method to fetch the title
-             */
-//            System.out.printf("\nWebsite Title: %s\n\n", doc.title());
+            WebClient webClient = new WebClient(BrowserVersion.CHROME);
+            webClient.getOptions().setJavaScriptEnabled(true); // enable javascript
+            webClient.getOptions().setThrowExceptionOnScriptError(false); //even if there is error in js continue
+            webClient.waitForBackgroundJavaScript(5000); // important! wait until javascript finishes rendering
+            HtmlPage page = webClient.getPage("https://www.tus.si/?s="+artikelName+"&post_type=product");
 
-            // Get the list of repositories
-            //*[@id="grid"]/div[1]/div[1]/div[4]/div[2]/strong
-            Elements repositories = doc.getElementsByClass("lib-product-price");
+            Document doc = Jsoup.parse(page.asXml());
+            Elements repositories = doc.getElementsByClass("price");
             if (!repositories.isEmpty()) {
-                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                 Element repository = repositories.first();
-                System.out.println(repositories.toString());
-                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-                price = Float.parseFloat(repository.text().replace(',','.'));
+                price = Float.parseFloat(repository.text().replace(',','.').replace('€',' '));
+                System.out.println(price);
             }
         } catch (IOException e) {
             e.printStackTrace();
