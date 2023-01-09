@@ -21,13 +21,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.logging.Logger;
+import com.kumuluz.ee.cors.annotations.CrossOrigin;
 
 
 @Log
 @ApplicationScoped
 @Path("/scrapper")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+@CrossOrigin
 public class ScrapperResource {
 
     private Logger log = Logger.getLogger(ScrapperResource.class.getName());
