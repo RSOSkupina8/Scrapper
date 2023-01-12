@@ -29,13 +29,13 @@ public class ScrapperBean {
         ArrayList<Float> list = new ArrayList<Float>();
 
         float valueTus = scrapeTus(artikelName);
-        float valueJager = scrapeJager(artikelName);
+        float valueJager = scrapeSN(artikelName);
         if (valueTus > 0) list.add(valueTus); else list.add((float) 0);
         if (valueJager > 0) list.add(valueJager); else list.add((float) 0);
         return list;
     }
 
-    public static float scrapeJager(String artikelName) {
+    public static float scrapeSN(String artikelName) {
         float price = 0;
         try {
             WebClient webClient = new WebClient(BrowserVersion.CHROME);
